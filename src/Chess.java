@@ -55,7 +55,14 @@ public class Chess {
         return false;
     }
 
-    
+    public boolean isLegalKnightMove(int fromRow, int fromCol, int toRow, int toCol, String piece) {
+        int rowDiff=Math.abs(fromRow-toRow);
+        int colDiff=Math.abs(fromCol-toCol);
+        String targetPiece=coins[toRow][toCol];
+
+        boolean isLShape=((rowDiff==2&& colDiff==1)||(rowDiff==1&& colDiff==2));
+        return isLShape && (targetPiece ==null || isSameTeam(targetPiece,piece));// target should be L-shape. move to empty cell or capture opponent(not same team).
+    }
 
     //   /////////////////////////////- cell click and after actions
 
@@ -91,7 +98,15 @@ public class Chess {
                 }
             }
 
-
+            if (selectedPiece.equals("♘") || selectedPiece.equals("♞")) {
+                if (!isLegalKnightMove(selectedRow, selectedCol, row, col, selectedPiece)) {
+                    JOptionPane.showMessageDialog(jf,
+                            "Illegal knight move !",
+                            "Can't play",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
 
 
             // ////////////moving the selected coin to other cell
