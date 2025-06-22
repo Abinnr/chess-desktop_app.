@@ -7,30 +7,62 @@ public class Chess {
     String[][] coins = new String[8][8];
     int selectedRow = -1;
     int selectedCol = -1;
-     // White starts the game
+    boolean whiteTurn = true; // White starts the game
+
 
 
     ///   ////////////////////////// all methods //////////////////////////////////////////
 
+    public boolean isCurrentPlayersPiece(String piece) {
+        return (whiteTurn && isWhite(piece)) || (!whiteTurn && isBlack(piece));
+    }
+
+    public boolean isWhite(String piece) {
+        return "♖♘♗♕♔♙".contains(piece);
+    }
+
+    public boolean isBlack(String piece) {
+        return "♜♞♝♛♚♟".contains(piece);
+    }
+
+    public boolean isSameTeam(String p1, String p2) {
+        return (isWhite(p1) && isWhite(p2)) || (isBlack(p1) && isBlack(p2));
+    }
+
+    ///   /////////////////////////////- cell click and after actions
+
     public void handleCellClick(int row, int col) {
+        String currentPiece=coins[row][col];
+
         if (selectedRow == -1) {
-            // First click: select a piece
-            if (coins[row][col] != null) {
+            // At the first click: select a piece and highlight that cell with yellow color
+            if (currentPiece != null && isCurrentPlayersPiece(currentPiece)) {
                 selectedRow = row;
                 selectedCol = col;
                 cells[row][col].setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
             }
         } else {
             // Second click: move the piece
-            String piece = coins[selectedRow][selectedCol];
+            String selectedPiece = coins[selectedRow][selectedCol];
 
-            // Move piece logic
-            coins[row][col] = piece;
+ ////////////////// checking is 2nd cliking is to the same color coin, if then no action taken, then selection of cell is repeated
+            if(currentPiece != null && isSameTeam(currentPiece,selectedPiece)){
+                cells[selectedRow][selectedCol].setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                selectedRow=-1;
+                selectedCol=-1;
+                return;
+            }
+
+            /// ////////////moving the selected coin to other cell
+            // Move selectedPiece logic
+            coins[row][col] = selectedPiece;
             coins[selectedRow][selectedCol] = null;
 
-            cells[row][col].setText(piece);
+            cells[row][col].setText(selectedPiece);
             cells[selectedRow][selectedCol].setText("");
             cells[selectedRow][selectedCol].setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+            whiteTurn = !whiteTurn;
 
             // Reset selection
             selectedRow = -1;
@@ -49,7 +81,7 @@ public class Chess {
         label.setFont(new Font("Serif", Font.PLAIN, 32));
         label.setBorder(BorderFactory.createLineBorder(Color.BLACK));// border for each cell
 
-        label.addMouseListener(new java.awt.event.MouseAdapter() {/// ///////////// creating actions when ckicking each cell
+        label.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 handleCellClick(row, col);
             }
@@ -58,9 +90,9 @@ public class Chess {
         frame.add(label);
         return label;
     }
-///   ////////////////////////////////////
 
-/// ////////////////////// creating backend logics of coin movements using 2D String matrix/////////////////////
+
+    /// ////////////////////// creating backend logics of coin movements using 2D String matrix/////////////////////
     public void initializeCoins() {
         // Black coins. These are uni-code strings for perform backend action logics
         coins[0][0] = "♜"; coins[0][1] = "♞"; coins[0][2] = "♝"; coins[0][3] = "♛";
@@ -74,9 +106,9 @@ public class Chess {
         for (int i = 0; i < 8; i++)
             coins[6][i] = "♙";
     }
-/// /////////////////////////////////////
 
-/// ////////////////// Display each coin unicode icon on the chess board for viewing
+
+/// ////////////////// Display each coin uni-code icon on the chess board for viewing
     public void ShowCoins() {
         // Showing Black coins on cells for the - 1st and 2nd rows
         cells[0][0].setText("♜");
@@ -114,7 +146,7 @@ public class Chess {
             }
         }
     }
-/// //////////////////////////////////////////////////////////////////////-coin display ends
+
 
 
     /// /////////////////////// Constructor chess//////////////////////////////////
@@ -149,5 +181,5 @@ public class Chess {
         jf.setVisible(true);
         jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-////////////////////////////////////////////-constructor ends
+
 }
