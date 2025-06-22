@@ -11,7 +11,7 @@ public class Chess {
 
 
 
-    ///   ////////////////////////// all methods //////////////////////////////////////////
+    //   ////////////////////////// all methods //////////////////////////////////////////
 
     public boolean isCurrentPlayersPiece(String piece) {
         return (whiteTurn && isWhite(piece)) || (!whiteTurn && isBlack(piece));
@@ -29,7 +29,35 @@ public class Chess {
         return (isWhite(p1) && isWhite(p2)) || (isBlack(p1) && isBlack(p2));
     }
 
-    ///   /////////////////////////////- cell click and after actions
+// ////////////////////// rules for pown////////////////////
+    public boolean isLegalPawnMove(int fromRow, int fromCol, int toRow, int toCol, String piece) {
+        int direction = isWhite(piece) ? -1 : 1;
+        int startRow = isWhite(piece) ? 6 : 1;
+        String destinationPiece = coins[toRow][toCol];
+
+        // Forward by 1. Need to be the same column, to the row just 1(direction) above/below from current position, no other coin should be there in destination cell.
+        if (fromCol == toCol && toRow == fromRow + direction && destinationPiece == null) {
+            return true;
+        }
+
+        // Forward by 2 from start row. Need to be the same column, to the row of 2 cells(direction *2) above/below from current position, no other coin should be there in destination cell, no coins should be infront of it.
+        if (fromCol == toCol && fromRow == startRow && toRow == fromRow + 2 * direction
+                && destinationPiece == null && coins[fromRow + direction][fromCol] == null) {
+            return true;
+        }
+
+        // Diagonal capture. Either left or right column(so abs used), to the row just 1 cell(direction) above or below from current position, destination shouldn't be null(there should be a coin to capture), the destination coin shouldn't be same team coin.
+        if (Math.abs(fromCol - toCol) == 1 && toRow == fromRow + direction && destinationPiece != null
+                && !isSameTeam(piece, destinationPiece)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    
+
+    //   /////////////////////////////- cell click and after actions
 
     public void handleCellClick(int row, int col) {
         String currentPiece=coins[row][col];
@@ -45,7 +73,7 @@ public class Chess {
             // Second click: move the piece
             String selectedPiece = coins[selectedRow][selectedCol];
 
- ////////////////// checking is 2nd cliking is to the same color coin, if then no action taken, then selection of cell is repeated
+ // //////////////// checking is 2nd clicking is to the same color coin, if then no action taken, then selection of cell is repeated
             if(currentPiece != null && isSameTeam(currentPiece,selectedPiece)){
                 cells[selectedRow][selectedCol].setBorder(BorderFactory.createLineBorder(Color.BLACK));
                 selectedRow=-1;
@@ -53,7 +81,20 @@ public class Chess {
                 return;
             }
 
-            /// ////////////moving the selected coin to other cell
+            if (selectedPiece.equals("♙") || selectedPiece.equals("♟")) {
+                if (!isLegalPawnMove(selectedRow, selectedCol, row, col, selectedPiece)) {
+                    JOptionPane.showMessageDialog(jf,
+                            "Illegal pown move !",
+                            "Can't play",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+
+
+
+
+            // ////////////moving the selected coin to other cell
             // Move selectedPiece logic
             coins[row][col] = selectedPiece;
             coins[selectedRow][selectedCol] = null;
@@ -70,7 +111,7 @@ public class Chess {
         }
     }
 
-/////////////////////////////// Creating Each chess cells/////////////////////////
+// ///////////////////////////// Creating Each chess cells/////////////////////////
     public JLabel createLabel(int x, int y, Color color, JFrame frame,int row, int col) {
         JLabel label = new JLabel();
         label.setBounds(x, y, 50, 50);
@@ -92,7 +133,7 @@ public class Chess {
     }
 
 
-    /// ////////////////////// creating backend logics of coin movements using 2D String matrix/////////////////////
+    // ////////////////////// creating backend logics of coin movements using 2D String matrix/////////////////////
     public void initializeCoins() {
         // Black coins. These are uni-code strings for perform backend action logics
         coins[0][0] = "♜"; coins[0][1] = "♞"; coins[0][2] = "♝"; coins[0][3] = "♛";
@@ -108,7 +149,7 @@ public class Chess {
     }
 
 
-/// ////////////////// Display each coin uni-code icon on the chess board for viewing
+// ////////////////// Display each coin uni-code icon on the chess board for viewing
     public void ShowCoins() {
         // Showing Black coins on cells for the - 1st and 2nd rows
         cells[0][0].setText("♜");
@@ -149,7 +190,7 @@ public class Chess {
 
 
 
-    /// /////////////////////// Constructor chess//////////////////////////////////
+    // /////////////////////// Constructor chess//////////////////////////////////
     public Chess(){
         jf=new JFrame("Chess multiplayer");
         jf.setLayout(null);
