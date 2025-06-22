@@ -120,6 +120,26 @@ public boolean isLegalRookMove(int fromRow, int fromCol, int toRow, int toCol, S
 }
 
 
+public boolean isLegalQueenMove(int fromRow, int fromCol, int toRow, int toCol, String piece) {
+    // Use bishop or rook logic for queen
+    return isLegalBishopMove(fromRow, fromCol, toRow, toCol, piece) ||
+           isLegalRookMove(fromRow, fromCol, toRow, toCol, piece);
+}
+
+public boolean isLegalKingMove(int fromRow, int fromCol, int toRow, int toCol, String piece) {
+    int rowDiff = Math.abs(toRow - fromRow);
+    int colDiff = Math.abs(toCol - fromCol);
+
+    // Move only 1 square in any direction
+    if (rowDiff <= 1 && colDiff <= 1) {
+        String targetPiece = coins[toRow][toCol];
+        return targetPiece == null || !isSameTeam(piece, targetPiece);
+    }
+
+    return false;
+}
+
+
     //   /////////////////////////////- cell click and after actions
 
     public void handleCellClick(int row, int col) {
@@ -185,8 +205,27 @@ public boolean isLegalRookMove(int fromRow, int fromCol, int toRow, int toCol, S
                 }
             }
 
-            
+            if (selectedPiece.equals("♕") || selectedPiece.equals("♛")) {
+                if (!isLegalQueenMove(selectedRow, selectedCol, row, col, selectedPiece)) {
+                    JOptionPane.showMessageDialog(jf,
+                            "Illegal queen move !",
+                            "Can't play",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
 
+    }
+}
+
+            if (selectedPiece.equals("♔") || selectedPiece.equals("♚")) {
+                if (!isLegalKingMove(selectedRow, selectedCol, row, col, selectedPiece)) {
+                    JOptionPane.showMessageDialog(jf,
+                            "Illegal queen move !",
+                            "Can't play",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+    }
+    }
+       
 
 
             // ////////////moving the selected coin to other cell
