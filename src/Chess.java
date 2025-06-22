@@ -1,5 +1,5 @@
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 public class Chess {
     JFrame jf;
@@ -64,6 +64,36 @@ public class Chess {
         return isLShape && (targetPiece ==null || isSameTeam(targetPiece,piece));// target should be L-shape. move to empty cell or capture opponent(not same team).
     }
 
+    public boolean isLegalBishopMove(int fromRow, int fromCol, int toRow, int toCol, String piece) {
+    int rowDiff = Math.abs(toRow - fromRow);// Difference in rows
+    int colDiff = Math.abs(toCol - fromCol);// Difference in columns
+
+    // Check if move is diagonal. if rowDiff and colDiff are equal, then it is diagonal move.
+    if (rowDiff != colDiff) {
+        return false;
+    }
+
+    int rowDirection = (toRow > fromRow) ? 1 : -1;//If destination row is greater than source row, then move up(+ve 1), else down(-ve -1).
+    int colDirection = (toCol > fromCol) ? 1 : -1;
+
+    // Check all squares between source and destination
+    int r = fromRow + rowDirection;//immediate diagonal cell row
+    int c = fromCol + colDirection;
+    while (r != toRow && c != toCol) {// repeat until we reach destination cell
+        // If any square in between is occupied by coin, return false
+        if (coins[r][c] != null) {
+            return false; // Path is blocked
+        }
+        r += rowDirection;// Move to the next diagonal square
+        c += colDirection;
+    }
+
+    // Final destination must be empty or enemy. 
+    String destinationPiece = coins[toRow][toCol];
+    return destinationPiece == null || !isSameTeam(piece, destinationPiece);
+}
+
+
     //   /////////////////////////////- cell click and after actions
 
     public void handleCellClick(int row, int col) {
@@ -107,6 +137,18 @@ public class Chess {
                     return;
                 }
             }
+
+            if (selectedPiece.equals("♗") || selectedPiece.equals("♝")) {
+                if (!isLegalBishopMove(selectedRow, selectedCol, row, col, selectedPiece)) {
+                    JOptionPane.showMessageDialog(jf,
+                            "Illegal bishop move !",
+                            "Can't play",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+
+            
 
 
             // ////////////moving the selected coin to other cell
