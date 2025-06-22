@@ -64,6 +64,7 @@ public class Chess {
         return isLShape && (targetPiece ==null || isSameTeam(targetPiece,piece));// target should be L-shape. move to empty cell or capture opponent(not same team).
     }
 
+
     public boolean isLegalBishopMove(int fromRow, int fromCol, int toRow, int toCol, String piece) {
     int rowDiff = Math.abs(toRow - fromRow);// Difference in rows
     int colDiff = Math.abs(toCol - fromCol);// Difference in columns
@@ -93,6 +94,31 @@ public class Chess {
     return destinationPiece == null || !isSameTeam(piece, destinationPiece);
 }
 
+public boolean isLegalRookMove(int fromRow, int fromCol, int toRow, int toCol, String piece) {
+    // Rook moves only in straight lines through rows or columns.
+    
+    boolean isVertical = fromCol == toCol && fromRow != toRow;
+    boolean isHorizontal = fromRow == toRow && fromCol != toCol;
+
+    if (!isVertical && !isHorizontal) return false;
+
+    int rowDirection = Integer.compare(toRow, fromRow);
+    int colDirection = Integer.compare(toCol, fromCol);
+
+    int r = fromRow + rowDirection;
+    int c = fromCol + colDirection;
+
+    while (r != toRow || c != toCol) {
+        if (coins[r][c] != null) return false; // path is blocked
+        r += rowDirection;
+        c += colDirection;
+    }
+
+    // Final destination must be empty or an enemy
+    String destinationPiece = coins[toRow][toCol];
+    return destinationPiece == null || !isSameTeam(piece, destinationPiece);
+}
+
 
     //   /////////////////////////////- cell click and after actions
 
@@ -117,13 +143,14 @@ public class Chess {
                 selectedCol=-1;
                 return;
             }
-
+            
+    
             if (selectedPiece.equals("♙") || selectedPiece.equals("♟")) {
                 if (!isLegalPawnMove(selectedRow, selectedCol, row, col, selectedPiece)) {
                     JOptionPane.showMessageDialog(jf,
                             "Illegal pown move !",
                             "Can't play",
-                            JOptionPane.WARNING_MESSAGE);
+                                JOptionPane.WARNING_MESSAGE);
                     return;
                 }
             }
@@ -148,7 +175,18 @@ public class Chess {
                 }
             }
 
+            if (selectedPiece.equals("♖") || selectedPiece.equals("♜")) {
+                if (!isLegalRookMove(selectedRow, selectedCol, row, col, selectedPiece)) {
+                    JOptionPane.showMessageDialog(jf,
+                            "Illegal rook move !",
+                            "Can't play",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            }
+
             
+
 
 
             // ////////////moving the selected coin to other cell
