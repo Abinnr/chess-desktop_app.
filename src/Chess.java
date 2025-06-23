@@ -8,6 +8,7 @@ public class Chess {
     int selectedRow = -1;
     int selectedCol = -1;
     boolean whiteTurn = true; // White starts the game
+    boolean gameOver = false;
 
 
 
@@ -100,15 +101,16 @@ public boolean isLegalRookMove(int fromRow, int fromCol, int toRow, int toCol, S
     boolean isVertical = fromCol == toCol && fromRow != toRow;
     boolean isHorizontal = fromRow == toRow && fromCol != toCol;
 
-    if (!isVertical && !isHorizontal) return false;
+    if (!isVertical && !isHorizontal) return false;// Not a valid rook move
 
-    int rowDirection = Integer.compare(toRow, fromRow);
+    int rowDirection = Integer.compare(toRow, fromRow);// Compare toRow and fromRow to determine direction
     int colDirection = Integer.compare(toCol, fromCol);
 
     int r = fromRow + rowDirection;
     int c = fromCol + colDirection;
 
-    while (r != toRow || c != toCol) {
+    while (r != toRow || c != toCol) {// check until we reach destination cell
+        // If any square in between is occupied by a coin, return false
         if (coins[r][c] != null) return false; // path is blocked
         r += rowDirection;
         c += colDirection;
@@ -140,9 +142,33 @@ public boolean isLegalKingMove(int fromRow, int fromCol, int toRow, int toCol, S
 }
 
 
+public void restartGame() {
+    selectedRow = -1;
+    selectedCol = -1;
+    whiteTurn = true;
+    gameOver = false;
+
+    // Clear board
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            coins[row][col] = null;
+            cells[row][col].setText("");
+            cells[row][col].setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        }
+    }
+
+    initializeCoins();
+    ShowCoins();
+}
+
+
     //   /////////////////////////////- cell click and after actions
 
     public void handleCellClick(int row, int col) {
+        if (gameOver) {
+            JOptionPane.showMessageDialog(jf, "Game is over! Please start a new game.");
+            return;
+        }
         String currentPiece=coins[row][col];
 
         if (selectedRow == -1) {
@@ -223,9 +249,24 @@ public boolean isLegalKingMove(int fromRow, int fromCol, int toRow, int toCol, S
                             "Can't play",
                             JOptionPane.WARNING_MESSAGE);
                     return;
-    }
-    }
+                }
+            }
        
+
+            // Check if the target cell contains a king coin (either black or white)
+            // If so, declare the winner and end the game
+            if ("♔".equals(selectedPiece)) {
+    JOptionPane.showMessageDialog(jf, "Black wins! ♚🏆\nStarting a new game...");
+    try { Thread.sleep(1000); } catch (InterruptedException e) {}// Restart the game after a short delay
+    restartGame();
+    return;
+}
+if ("♚".equals(selectedPiece)) {
+    JOptionPane.showMessageDialog(jf, "White wins! ♔🏆\nStarting a new game...");
+    try { Thread.sleep(1000); } catch (InterruptedException e) {}// Restart the game after a short delay
+    restartGame();//
+    return;
+}
 
 
             // ////////////moving the selected coin to other cell
