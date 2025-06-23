@@ -1,5 +1,8 @@
 import java.awt.*;
+import java.util.ArrayList;
 import javax.swing.*;
+
+
 
 public class Chess {
     JFrame jf;
@@ -11,6 +14,7 @@ public class Chess {
     boolean gameOver = false;
 
 
+    ArrayList<Point> highlightedMoves = new ArrayList<>(); // To store highlighted legal moves
 
     //   ////////////////////////// all methods //////////////////////////////////////////
 
@@ -162,6 +166,89 @@ public void restartGame() {
 }
 
 
+        public Point findKingPosition(boolean isWhiteKing) {
+    String king = isWhiteKing ? "♔" : "♚";
+
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            if (king.equals(coins[row][col])) {
+                return new Point(row, col);
+            }
+        }
+    }
+    return null; // king not found
+}
+
+
+public boolean isKingInCheck(boolean whiteKing) {
+    Point kingPos = findKingPosition(whiteKing);
+    if (kingPos == null) return false; // shouldn't happen
+
+    int kr = kingPos.x;
+    int kc = kingPos.y;
+
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            String piece = coins[row][col];
+            if (piece == null) continue;
+
+            if (!isCurrentPlayersPiece(piece)) { // opponent piece
+                if (
+                    (piece.equals("♙") || piece.equals("♟")) && isLegalPawnMove(row, col, kr, kc, piece) ||
+                    (piece.equals("♘") || piece.equals("♞")) && isLegalKnightMove(row, col, kr, kc, piece) ||
+                    (piece.equals("♗") || piece.equals("♝")) && isLegalBishopMove(row, col, kr, kc, piece) ||
+                    (piece.equals("♖") || piece.equals("♜")) && isLegalRookMove(row, col, kr, kc, piece) ||
+                    (piece.equals("♕") || piece.equals("♛")) && isLegalQueenMove(row, col, kr, kc, piece) ||
+                    (piece.equals("♔") || piece.equals("♚")) && isLegalKingMove(row, col, kr, kc, piece)
+                ) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+
+
+
+public void highlightLegalMoves(int row, int col, String piece) {
+    clearHighlights();
+
+    for (int r = 0; r < 8; r++) {
+        for (int c = 0; c < 8; c++) {
+            boolean isLegal = false;
+
+            if (piece.equals("♙") || piece.equals("♟")) {
+                isLegal = isLegalPawnMove(row, col, r, c, piece);
+            } else if (piece.equals("♘") || piece.equals("♞")) {
+                isLegal = isLegalKnightMove(row, col, r, c, piece);
+            } else if (piece.equals("♗") || piece.equals("♝")) {
+                isLegal = isLegalBishopMove(row, col, r, c, piece);
+            } else if (piece.equals("♖") || piece.equals("♜")) {
+                isLegal = isLegalRookMove(row, col, r, c, piece);
+            } else if (piece.equals("♕") || piece.equals("♛")) {
+                isLegal = isLegalQueenMove(row, col, r, c, piece);
+            } else if (piece.equals("♔") || piece.equals("♚")) {
+                isLegal = isLegalKingMove(row, col, r, c, piece);
+            }
+
+            if (isLegal && (coins[r][c] == null || !isSameTeam(piece, coins[r][c]))) {
+                cells[r][c].setBorder(BorderFactory.createLineBorder(Color.GREEN, 2));
+                highlightedMoves.add(new Point(r, c));
+            }
+        }
+    }
+}
+
+public void clearHighlights() {
+    for (Point p : highlightedMoves) {
+        cells[p.x][p.y].setBorder(BorderFactory.createLineBorder(Color.BLACK));
+    }
+    highlightedMoves.clear();
+}
+
     //   /////////////////////////////- cell click and after actions
 
     public void handleCellClick(int row, int col) {
@@ -172,6 +259,8 @@ public void restartGame() {
         String currentPiece=coins[row][col];
 
         if (selectedRow == -1) {
+            highlightLegalMoves(row, col, currentPiece);
+
             // At the first click: select a piece and highlight that cell with yellow color
             if (currentPiece != null && isCurrentPlayersPiece(currentPiece)) {
                 selectedRow = row;
@@ -179,6 +268,7 @@ public void restartGame() {
                 cells[row][col].setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
             }
         } else {
+            clearHighlights();
             // Second click: move the piece
             String selectedPiece = coins[selectedRow][selectedCol];
 
@@ -277,6 +367,15 @@ if ("♚".equals(selectedPiece)) {
             cells[row][col].setText(selectedPiece);
             cells[selectedRow][selectedCol].setText("");
             cells[selectedRow][selectedCol].setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+            boolean opponentKingInCheck = isKingInCheck(!whiteTurn);
+
+            if (opponentKingInCheck) {
+                String checkedSide = whiteTurn ? "Black" : "White";
+                JOptionPane.showMessageDialog(jf, checkedSide + " King is in CHECK! ⚠️");// 
+
+            }
+
 
             whiteTurn = !whiteTurn;
 
