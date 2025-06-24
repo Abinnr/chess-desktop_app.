@@ -243,6 +243,12 @@ public void clearHighlights() {
 public void highlightLegalMoves(int row, int col, String piece) {
         clearHighlights();
 
+        // Only highlight if it's the current player's piece
+if (!isCurrentPlayersPiece(piece)) {
+    return;
+}
+
+
         for (int r = 0; r < 8; r++) {
             for (int c = 0; c < 8; c++) {
                 if (r == row && c == col) continue; // Skip the same cell
