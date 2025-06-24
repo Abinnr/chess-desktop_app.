@@ -1,2 +1,3 @@
 # chess-multiplayer
-A multiplayer chess made from scratch
+A desktop chess app made from scratch using java only
+
