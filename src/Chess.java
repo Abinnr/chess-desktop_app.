@@ -1,6 +1,8 @@
 import java.awt.*;
 import javax.swing.*;
 
+
+
 public class Chess {
     JFrame jf;
     JLabel[][] cells;
@@ -11,15 +13,16 @@ public class Chess {
     boolean gameOver = false;
 
 
+   // 
 
     //   ////////////////////////// all methods //////////////////////////////////////////
 
     public boolean isCurrentPlayersPiece(String piece) {
-        return (whiteTurn && isWhite(piece)) || (!whiteTurn && isBlack(piece));
+        return (whiteTurn && isWhite(piece)) || (!whiteTurn && isBlack(piece));// (checking turn is for white and clicked in white piece) or (turn is for black and clicked in black piece)
     }
 
     public boolean isWhite(String piece) {
-        return "♖♘♗♕♔♙".contains(piece);
+        return "♖♘♗♕♔♙".contains(piece);//returns true if piece is white
     }
 
     public boolean isBlack(String piece) {
@@ -27,7 +30,7 @@ public class Chess {
     }
 
     public boolean isSameTeam(String p1, String p2) {
-        return (isWhite(p1) && isWhite(p2)) || (isBlack(p1) && isBlack(p2));
+        return (isWhite(p1) && isWhite(p2)) || (isBlack(p1) && isBlack(p2));//returns true if first clicked piece and second clicked piece are of same team
     }
 
 // ////////////////////// rules for pown////////////////////
@@ -162,6 +165,55 @@ public void restartGame() {
 }
 
 
+        public Point findKingPosition(boolean isWhiteKing) {
+    String king = isWhiteKing ? "♔" : "♚";
+
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            if (king.equals(coins[row][col])) {
+                return new Point(row, col);
+            }
+        }
+    }
+    return null; // king not found
+}
+
+
+public boolean isKingInCheck(boolean whiteKing) {
+    Point kingPos = findKingPosition(whiteKing);
+    if (kingPos == null) return false; // shouldn't happen
+
+    int kr = kingPos.x;
+    int kc = kingPos.y;
+
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            String piece = coins[row][col];
+            if (piece == null) continue;
+
+            if (!isCurrentPlayersPiece(piece)) { //checking all opponent piece (means not current player's piece)
+                if (// Check if the piece can attack the king(if it is pown, pown's toRow,toCol should be the same as king's row and column, then it could lead to check), if it is knight, bishop, rook, queen or king, then check their respective move logics)
+                    (piece.equals("♙") || piece.equals("♟")) && isLegalPawnMove(row, col, kr, kc, piece) ||
+                    (piece.equals("♘") || piece.equals("♞")) && isLegalKnightMove(row, col, kr, kc, piece) ||
+                    (piece.equals("♗") || piece.equals("♝")) && isLegalBishopMove(row, col, kr, kc, piece) ||
+                    (piece.equals("♖") || piece.equals("♜")) && isLegalRookMove(row, col, kr, kc, piece) ||
+                    (piece.equals("♕") || piece.equals("♛")) && isLegalQueenMove(row, col, kr, kc, piece) ||
+                    (piece.equals("♔") || piece.equals("♚")) && isLegalKingMove(row, col, kr, kc, piece)
+                ) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+
+
+
+
+
     //   /////////////////////////////- cell click and after actions
 
     public void handleCellClick(int row, int col) {
@@ -172,6 +224,9 @@ public void restartGame() {
         String currentPiece=coins[row][col];
 
         if (selectedRow == -1) {
+            
+            //
+
             // At the first click: select a piece and highlight that cell with yellow color
             if (currentPiece != null && isCurrentPlayersPiece(currentPiece)) {
                 selectedRow = row;
@@ -179,6 +234,8 @@ public void restartGame() {
                 cells[row][col].setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
             }
         } else {
+            //
+
             // Second click: move the piece
             String selectedPiece = coins[selectedRow][selectedCol];
 
@@ -277,6 +334,15 @@ if ("♚".equals(selectedPiece)) {
             cells[row][col].setText(selectedPiece);
             cells[selectedRow][selectedCol].setText("");
             cells[selectedRow][selectedCol].setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+            boolean opponentKingInCheck = isKingInCheck(!whiteTurn);
+
+            if (opponentKingInCheck) {
+                String checkedSide = whiteTurn ? "Black" : "White";
+                JOptionPane.showMessageDialog(jf, checkedSide + " King is in CHECK! ⚠️");// 
+
+            }
+
 
             whiteTurn = !whiteTurn;
 
