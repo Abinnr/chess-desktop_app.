@@ -13,7 +13,7 @@ public class Chess {
     boolean gameOver = false;
 
 
-   // 
+
 
     //   ////////////////////////// all methods //////////////////////////////////////////
 
@@ -178,10 +178,16 @@ public void restartGame() {
     return null; // king not found
 }
 
+public boolean isOpponentPiece(String piece, boolean whiteKing) {
+    return (whiteKing && isBlack(piece)) || (!whiteKing && isWhite(piece));
+}
 
+
+
+                
 public boolean isKingInCheck(boolean whiteKing) {
     Point kingPos = findKingPosition(whiteKing);
-    if (kingPos == null) return false; // shouldn't happen
+    if (kingPos == null) return false;
 
     int kr = kingPos.x;
     int kc = kingPos.y;
@@ -191,7 +197,7 @@ public boolean isKingInCheck(boolean whiteKing) {
             String piece = coins[row][col];
             if (piece == null) continue;
 
-            if (!isCurrentPlayersPiece(piece)) { //checking all opponent piece (means not current player's piece)
+            if (isOpponentPiece(piece, whiteKing)) {//checking all opponent piece (means not current player's piece)
                 if (// Check if the piece can attack the king(if it is pown, pown's toRow,toCol should be the same as king's row and column, then it could lead to check), if it is knight, bishop, rook, queen or king, then check their respective move logics)
                     (piece.equals("♙") || piece.equals("♟")) && isLegalPawnMove(row, col, kr, kc, piece) ||
                     (piece.equals("♘") || piece.equals("♞")) && isLegalKnightMove(row, col, kr, kc, piece) ||
@@ -214,6 +220,7 @@ public boolean isKingInCheck(boolean whiteKing) {
 
 
 
+
     //   /////////////////////////////- cell click and after actions
 
     public void handleCellClick(int row, int col) {
@@ -224,8 +231,7 @@ public boolean isKingInCheck(boolean whiteKing) {
         String currentPiece=coins[row][col];
 
         if (selectedRow == -1) {
-            
-            //
+
 
             // At the first click: select a piece and highlight that cell with yellow color
             if (currentPiece != null && isCurrentPlayersPiece(currentPiece)) {
@@ -234,7 +240,6 @@ public boolean isKingInCheck(boolean whiteKing) {
                 cells[row][col].setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
             }
         } else {
-            //
 
             // Second click: move the piece
             String selectedPiece = coins[selectedRow][selectedCol];
