@@ -12,12 +12,28 @@ public class Chess {
     int selectedCol = -1;
     boolean whiteTurn = true; // White starts the game
     boolean gameOver = false;
+    JLabel turnLabel;
+
 
 
 ArrayList<Point> highlightedMoves = new ArrayList<>(); // To store highlighted legal moves
 
 
     //   ////////////////////////// all methods //////////////////////////////////////////
+
+public void updateTurnLabel() {
+    if (whiteTurn) {
+        turnLabel.setText("White's Turn ♙");
+        turnLabel.setBackground(Color.DARK_GRAY);
+        turnLabel.setForeground(Color.WHITE);
+    } else {
+        turnLabel.setText("Black's Turn ♟");
+        turnLabel.setBackground(Color.LIGHT_GRAY);
+        turnLabel.setForeground(Color.BLACK);
+    }
+    turnLabel.repaint(); // Force UI update
+}
+
 
     public boolean isCurrentPlayersPiece(String piece) {
         return (whiteTurn && isWhite(piece)) || (!whiteTurn && isBlack(piece));// (checking turn is for white and clicked in white piece) or (turn is for black and clicked in black piece)
@@ -72,33 +88,32 @@ ArrayList<Point> highlightedMoves = new ArrayList<>(); // To store highlighted l
 
 
     public boolean isLegalBishopMove(int fromRow, int fromCol, int toRow, int toCol, String piece) {
-    int rowDiff = Math.abs(toRow - fromRow);// Difference in rows
-    int colDiff = Math.abs(toCol - fromCol);// Difference in columns
+        int rowDiff = Math.abs(toRow - fromRow);
+        int colDiff = Math.abs(toCol - fromCol);
 
-    // Check if move is diagonal. if rowDiff and colDiff are equal, then it is diagonal move.
-    if (rowDiff != colDiff) {
-        return false;
-    }
-
-    int rowDirection = (toRow > fromRow) ? 1 : -1;//If destination row is greater than source row, then move up(+ve 1), else down(-ve -1).
-    int colDirection = (toCol > fromCol) ? 1 : -1;
-
-    // Check all squares between source and destination
-    int r = fromRow + rowDirection;//immediate diagonal cell row
-    int c = fromCol + colDirection;
-    while (r != toRow && c != toCol) {// repeat until we reach destination cell
-        // If any square in between is occupied by coin, return false
-        if (coins[r][c] != null) {
-            return false; // Path is blocked
+        // Not a diagonal move
+        if (rowDiff != colDiff) {
+            return false;
         }
-        r += rowDirection;// Move to the next diagonal square
-        c += colDirection;
-    }
 
-    // Final destination must be empty or enemy. 
-    String destinationPiece = coins[toRow][toCol];
-    return destinationPiece == null || !isSameTeam(piece, destinationPiece);
-}
+        int rowDirection = (toRow > fromRow) ? 1 : -1;
+        int colDirection = (toCol > fromCol) ? 1 : -1;
+
+        int r = fromRow + rowDirection;
+        int c = fromCol + colDirection;
+
+        // Check path for obstacles
+        while (r != toRow || c != toCol) {
+            if (r < 0 || r >= 8 || c < 0 || c >= 8) return false;
+            if (coins[r][c] != null) return false;
+            r += rowDirection;
+            c += colDirection;
+        }
+
+        // Final destination
+        String destinationPiece = coins[toRow][toCol];
+        return destinationPiece == null || !isSameTeam(piece, destinationPiece);
+    }
 
 public boolean isLegalRookMove(int fromRow, int fromCol, int toRow, int toCol, String piece) {
     // Rook moves only in straight lines through rows or columns.
@@ -226,33 +241,34 @@ public void clearHighlights() {
 
 
 public void highlightLegalMoves(int row, int col, String piece) {
-    clearHighlights();
+        clearHighlights();
 
-    for (int r = 0; r < 8; r++) {
-        for (int c = 0; c < 8; c++) {
-            boolean isLegal = false;
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                if (r == row && c == col) continue; // Skip the same cell
+                boolean isLegal = false;
 
-            if (piece.equals("♙") || piece.equals("♟")) {
-                isLegal = isLegalPawnMove(row, col, r, c, piece);
-            } else if (piece.equals("♘") || piece.equals("♞")) {
-                isLegal = isLegalKnightMove(row, col, r, c, piece);
-            } else if (piece.equals("♗") || piece.equals("♝")) {
-                isLegal = isLegalBishopMove(row, col, r, c, piece);
-            } else if (piece.equals("♖") || piece.equals("♜")) {
-                isLegal = isLegalRookMove(row, col, r, c, piece);
-            } else if (piece.equals("♕") || piece.equals("♛")) {
-                isLegal = isLegalQueenMove(row, col, r, c, piece);
-            } else if (piece.equals("♔") || piece.equals("♚")) {
-                isLegal = isLegalKingMove(row, col, r, c, piece);
-            }
+                if (piece.equals("♙") || piece.equals("♟")) {
+                    isLegal = isLegalPawnMove(row, col, r, c, piece);
+                } else if (piece.equals("♘") || piece.equals("♞")) {
+                    isLegal = isLegalKnightMove(row, col, r, c, piece);
+                } else if (piece.equals("♗") || piece.equals("♝")) {
+                    isLegal = isLegalBishopMove(row, col, r, c, piece);
+                } else if (piece.equals("♖") || piece.equals("♜")) {
+                    isLegal = isLegalRookMove(row, col, r, c, piece);
+                } else if (piece.equals("♕") || piece.equals("♛")) {
+                    isLegal = isLegalQueenMove(row, col, r, c, piece);
+                } else if (piece.equals("♔") || piece.equals("♚")) {
+                    isLegal = isLegalKingMove(row, col, r, c, piece);
+                }
 
-            if (isLegal && (coins[r][c] == null || !isSameTeam(piece, coins[r][c]))) {
-                cells[r][c].setBorder(BorderFactory.createLineBorder(Color.GREEN, 2));
-                highlightedMoves.add(new Point(r, c));
+                if (isLegal && (coins[r][c] == null || !isSameTeam(piece, coins[r][c]))) {
+                    cells[r][c].setBorder(BorderFactory.createLineBorder(Color.GREEN, 2));
+                    highlightedMoves.add(new Point(r, c));
+                }
             }
         }
     }
-}
 
 
 
@@ -391,7 +407,10 @@ if ("♚".equals(selectedPiece)) {
             }
 
 
+            
             whiteTurn = !whiteTurn;
+            updateTurnLabel();
+
 
             // Reset selection
             selectedRow = -1;
@@ -482,8 +501,17 @@ if ("♚".equals(selectedPiece)) {
     public Chess(){
         jf=new JFrame("Chess multiplayer");
         jf.setLayout(null);
-        jf.setSize(417,440);
+        jf.setSize(417,470);
         jf.setLocation(400,50);
+
+        turnLabel = new JLabel("White's Turn ♙", SwingConstants.CENTER);
+turnLabel.setBounds(0, 400, 417, 30);
+turnLabel.setFont(new Font("Serif", Font.BOLD, 18));
+turnLabel.setForeground(Color.WHITE);
+turnLabel.setOpaque(true);
+turnLabel.setBackground(Color.DARK_GRAY);
+jf.add(turnLabel);
+
 
         cells = new JLabel[8][8]; // For 8 rows and 8 columns
 
@@ -504,6 +532,7 @@ if ("♚".equals(selectedPiece)) {
         }
         initializeCoins();
         ShowCoins();
+        updateTurnLabel();
 
 
 
