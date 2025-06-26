@@ -1,5 +1,5 @@
 # Chess Multiplayer Game (Java Swing)
-
+> Chess is the gymnasium of the mind. Keep building, keep growing. ♛
 Welcome to the Java-based Chess Multiplayer Game! ♟️ This project is a desktop application built using **Java Swing** that allows two players to play chess on a fully functional GUI board.
 
 ## 🎯 Features
@@ -42,11 +42,9 @@ https://github.com/your-username/java-chess-multi_player.git
 
 
 ## 👨‍💻 Developed By
-Abin NR
 
 **Abin NR**
 B. Tech CSE Student
 LBS College of Engineering
 
-> Chess is the gymnasium of the mind. Keep building, keep growing. ♛
 
