@@ -15,7 +15,8 @@ This project is a desktop application built using **Java Swing** that allows two
 * 🎨 Classic chessboard design using Java Swing
 
 ## 🗂️ Project Structure
-chess-singleplayer-java/
+
+chess-multi_player/
 │
 ├── src/
 │   ├── Chess.java         # GUI of Chess
