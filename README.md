@@ -16,11 +16,11 @@ This project is a desktop application built using **Java Swing** that allows two
 
 ## 🗂️ Project Structure
 
-*chess-multi_player/
-*│
-*├── src/
-*│   ├── Chess.java         # GUI of Chess
-*│   ├── Main.java         # main 
+chess-multi_player/
+│
+├── src/
+│   ├── Chess.java         # GUI of Chess
+│   ├── Main.java         # main 
 
 
 ---------
